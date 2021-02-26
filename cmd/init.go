@@ -1,11 +1,19 @@
 package cmd
 
 import (
+	"fmt"
 	"log"
+	"os"
 	"os/exec"
 
 	"github.com/spf13/cobra"
 )
+
+func run(name string, args ...string) {
+	if err := exec.Command(name, args...).Run(); err != nil {
+		panic(err)
+	}
+}
 
 // initCmd represents the init command
 var initCmd = &cobra.Command{
@@ -18,9 +26,19 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := exec.Command("git", "init", "--initial-branch", "master").Run(); err != nil {
+		cwd, err := os.Getwd()
+		if err != nil {
 			log.Fatal(err)
 		}
+		run("git", "init", "--initial-branch", "master", cwd)
+
+		run("git", "commit", "--allow-empty", "--message", "root commit")
+
+		// Set up a default "origin" remote as our own repo.
+		run("git", "remote", "add", "origin", fmt.Sprintf("file://%s", cwd))
+		run("git", "fetch", "origin", "master")
+
+		run("git", "checkout", "origin/master")
 	},
 }
 
