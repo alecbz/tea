@@ -12,6 +12,7 @@ func git(args ...string) {
 func showGit(args ...string) {
 	c := exec.Command("git", args...)
 	c.Stdout = os.Stdout
+	c.Stderr = os.Stderr
 	runOrPanic(c)
 }
 
