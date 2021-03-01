@@ -3,7 +3,6 @@ package cmd
 import (
 	"fmt"
 	"log"
-	"os/exec"
 	"os/user"
 
 	"github.com/spf13/cobra"
@@ -21,17 +20,15 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := exec.Command("git", "fetch", "origin", "master-passing-tests").Run(); err != nil {
-			log.Fatal("error fetching:", err)
-		}
+		git("fetch", "origin", "master-passing-tests")
 
 		u, err := user.Current()
 		if err != nil {
 			log.Fatal("error getting current user:", err)
 		}
-		if err := exec.Command("git", "switch", "--create", fmt.Sprintf("%s/%s", u.Username, args[0]), "origin/master-passing-tests").Run(); err != nil {
-			log.Fatal("error starting new branch:", err)
-		}
+		branch := fmt.Sprintf("%s/%s", u.Username, args[0])
+		git("switch", "--create", branch, "origin/master-passing-tests")
+		git("branch", fmt.Sprintf("--set-upstream-to=origin/%s", branch), branch)
 	},
 }
 
