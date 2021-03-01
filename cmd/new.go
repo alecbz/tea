@@ -28,7 +28,7 @@ to quickly create a Cobra application.`,
 		}
 		branch := fmt.Sprintf("%s/%s", u.Username, args[0])
 		git("switch", "--create", branch, "origin/master-passing-tests")
-		git("branch", fmt.Sprintf("--set-upstream-to=origin/%s", branch), branch)
+		git("push", "--set-upstream", "origin", "HEAD")
 	},
 }
 
