@@ -23,15 +23,15 @@ to quickly create a Cobra application.`,
 		if err != nil {
 			log.Fatal(err)
 		}
-		git("init", "--initial-branch", "master", cwd)
+		git("init", "--initial-branch", config.MainBranch, cwd)
 
 		git("commit", "--allow-empty", "--message", "root commit")
 
 		// Set up a default "origin" remote as our own repo.
 		git("remote", "add", "origin", fmt.Sprintf("file://%s", cwd))
-		git("fetch", "origin", "master")
+		git("fetch", "origin", config.MainBranch)
 
-		git("checkout", "origin/master")
+		git("checkout", fmt.Sprintf("origin/%s", config.MainBranch))
 	},
 }
 

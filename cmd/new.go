@@ -20,14 +20,14 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		git("fetch", "origin", "master-passing-tests")
+		git("fetch", "origin", config.MainBranch)
 
 		u, err := user.Current()
 		if err != nil {
 			log.Fatal("error getting current user:", err)
 		}
 		branch := fmt.Sprintf("%s/%s", u.Username, args[0])
-		git("switch", "--create", branch, "origin/master-passing-tests")
+		git("switch", "--create", branch, fmt.Sprintf("origin/%s", branch))
 		git("push", "--set-upstream", "origin", "HEAD")
 	},
 }
