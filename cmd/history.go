@@ -24,7 +24,7 @@ to quickly create a Cobra application.`,
 			log.Fatal(err)
 		}
 
-		showGit("reflog", strings.TrimSpace(string(branch)))
+		showGit("reflog", strings.TrimSpace(string(branch)), "--date=relative")
 	},
 }
 
