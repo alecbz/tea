@@ -27,7 +27,7 @@ to quickly create a Cobra application.`,
 			log.Fatal("error getting current user:", err)
 		}
 		branch := fmt.Sprintf("%s/%s", u.Username, args[0])
-		git("switch", "--create", branch, fmt.Sprintf("origin/%s", branch))
+		git("switch", "--create", branch, fmt.Sprintf("origin/%s", config.MainBranch))
 		git("push", "--set-upstream", "origin", "HEAD")
 	},
 }
