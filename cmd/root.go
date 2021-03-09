@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"log"
+	"os"
 
 	"github.com/spf13/cobra"
 
@@ -61,7 +62,11 @@ func initConfig() {
 		home, err := homedir.Dir()
 		cobra.CheckErr(err)
 
+		wd, err := os.Getwd()
+		cobra.CheckErr(err)
+
 		// Search config in home directory with name ".tea" (without extension).
+		viper.AddConfigPath(wd)
 		viper.AddConfigPath(home)
 		viper.SetConfigName(".tea")
 	}
