@@ -20,7 +20,7 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		git("fetch", "origin", config.MainBranch)
+		fetch("origin", config.MainBranch)
 
 		u, err := user.Current()
 		if err != nil {
@@ -28,7 +28,9 @@ to quickly create a Cobra application.`,
 		}
 		branch := fmt.Sprintf("%s/%s", u.Username, args[0])
 		git("switch", "--create", branch, fmt.Sprintf("origin/%s", config.MainBranch))
-		git("push", "--set-upstream", "origin", "HEAD")
+		spin(fmt.Sprintf("Pushing branch %s to origin", branch), func() {
+			git("push", "--set-upstream", "origin", "HEAD")
+		})
 	},
 }
 

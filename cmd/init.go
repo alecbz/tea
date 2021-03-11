@@ -29,7 +29,7 @@ to quickly create a Cobra application.`,
 
 		// Set up a default "origin" remote as our own repo.
 		git("remote", "add", "origin", fmt.Sprintf("file://%s", cwd))
-		git("fetch", "origin", config.MainBranch)
+		fetch("origin", config.MainBranch)
 
 		git("checkout", fmt.Sprintf("origin/%s", config.MainBranch))
 	},
