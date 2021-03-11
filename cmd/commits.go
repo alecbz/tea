@@ -6,6 +6,7 @@ import (
 
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing/object"
+	"github.com/go-git/go-git/v5/plumbing/storer"
 	"github.com/spf13/cobra"
 )
 
@@ -27,6 +28,9 @@ var commitsCmd = &cobra.Command{
 		iter, err := r.Log(&git.LogOptions{From: head.Hash()})
 		p := page()
 		err = iter.ForEach(func(c *object.Commit) error {
+			if p.Done() {
+				return storer.ErrStop
+			}
 			fmt.Fprintf(p, "%s (WTB decorations) \n", yellow(c.Hash.String()[:7]))
 			fmt.Fprintf(p, "%s, %s\n", blue(person(c.Author)), humanTime(c.Author.When))
 			fmt.Fprintln(p)

@@ -33,6 +33,15 @@ func (p pager) Write(b []byte) (int, error) {
 	return p.w.Write(b)
 }
 
+func (p pager) Done() bool {
+	select {
+	case <-p.done:
+		return true
+	default:
+		return false
+	}
+}
+
 func (p pager) Wait() {
 	p.w.Close()
 	<-p.done
