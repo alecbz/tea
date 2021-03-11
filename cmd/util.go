@@ -5,9 +5,12 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"strings"
 	"time"
 
 	"github.com/briandowns/spinner"
+	"github.com/fatih/color"
+	"github.com/go-git/go-git/v5/plumbing/object"
 )
 
 var (
@@ -19,7 +22,12 @@ func init() {
 	start = time.Now()
 }
 
-func git(args ...string) {
+var (
+	yellow = color.New(color.FgYellow).SprintFunc()
+	blue   = color.New(color.FgBlue).SprintFunc()
+)
+
+func runGit(args ...string) {
 	c := exec.Command("git", args...)
 	out, err := c.CombinedOutput()
 	if err != nil {
@@ -38,7 +46,7 @@ func showGit(args ...string) {
 
 func fetch(remote, branch string) {
 	spin(fmt.Sprintf("Fetching %s from %s", branch, remote), func() {
-		git("fetch", remote, branch)
+		runGit("fetch", remote, branch)
 	})
 }
 
@@ -65,4 +73,40 @@ func spin(msg string, work func()) {
 			s.Start()
 		}
 	}
+}
+
+func person(s object.Signature) string {
+	at := strings.Index(s.Email, "@")
+	if at != -1 {
+		return s.Email[:at+1]
+	}
+	return s.Email
+}
+
+func humanTime(t time.Time) string {
+	t = t.In(time.Local)
+
+	now := time.Now()
+	sameYear := t.Year() == now.Year()
+	if sameYear && t.Month() == now.Month() && t.Day() == now.Day() {
+		return humanDuration(time.Since(t))
+	}
+	if sameYear {
+		//	Mon Jan 2 15:04:05 -0700 MST 2006
+		return t.Format("Mon Jan 2, 3:04 PM")
+	}
+	return t.String()
+}
+
+func humanDuration(d time.Duration) string {
+	if d < time.Minute {
+		return "now"
+	}
+	if d < time.Hour {
+		return fmt.Sprintf("%d minutes ago", d/time.Minute)
+	}
+	if d < 2*24*time.Hour {
+		return fmt.Sprintf("%d hours ago", d/time.Hour)
+	}
+	return fmt.Sprintf("%d days ago", d/(24*time.Hour))
 }
