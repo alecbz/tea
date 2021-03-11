@@ -10,6 +10,15 @@ import (
 	"github.com/briandowns/spinner"
 )
 
+var (
+	start           time.Time
+	delaySpinnerFor = 5 * time.Second
+)
+
+func init() {
+	start = time.Now()
+}
+
 func git(args ...string) {
 	c := exec.Command("git", args...)
 	out, err := c.CombinedOutput()
@@ -34,11 +43,26 @@ func fetch(remote, branch string) {
 }
 
 func spin(msg string, work func()) {
-	s := spinner.New(spinner.CharSets[14], 50*time.Millisecond)
-	s.Suffix = " " + msg
-	s.Start()
+	done := make(chan (struct{}))
+	go func() {
+		work()
+		close(done)
+	}()
 
-	work()
+	var s *spinner.Spinner
+	delay := time.After(delaySpinnerFor - time.Since(start))
 
-	s.Stop()
+	for {
+		select {
+		case <-done:
+			if s != nil {
+				s.Stop()
+			}
+			return
+		case <-delay:
+			s = spinner.New(spinner.CharSets[14], 50*time.Millisecond)
+			s.Suffix = " " + msg
+			s.Start()
+		}
+	}
 }
