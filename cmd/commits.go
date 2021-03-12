@@ -4,10 +4,17 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/fatih/color"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing/object"
 	"github.com/go-git/go-git/v5/plumbing/storer"
 	"github.com/spf13/cobra"
+)
+
+var (
+	hash    = color.New(color.FgYellow).SprintFunc()
+	author  = color.New(color.FgBlue).SprintFunc()
+	message = color.New(color.FgGreen).SprintFunc()
 )
 
 var commitsCmd = &cobra.Command{
@@ -31,10 +38,8 @@ var commitsCmd = &cobra.Command{
 			if p.Done() {
 				return storer.ErrStop
 			}
-			fmt.Fprintf(p, "%s (WTB decorations) \n", yellow(c.Hash.String()[:7]))
-			fmt.Fprintf(p, "%s, %s\n", blue(person(c.Author)), humanTime(c.Author.When))
-			fmt.Fprintln(p)
-			fmt.Fprintf(p, "%s\n", c.Message)
+			fmt.Fprintf(p, "%s %s \n", hash(c.Hash.String()[:7]), message(firstLine(c.Message)))
+			fmt.Fprintf(p, "\t%s - %s\n\n", author(person(c.Author)), humanTime(c.Author.When))
 			return nil
 		})
 		if err != nil {

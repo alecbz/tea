@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/briandowns/spinner"
-	"github.com/fatih/color"
 	"github.com/go-git/go-git/v5/plumbing/object"
 )
 
@@ -21,11 +20,6 @@ var (
 func init() {
 	start = time.Now()
 }
-
-var (
-	yellow = color.New(color.FgYellow).SprintFunc()
-	blue   = color.New(color.FgBlue).SprintFunc()
-)
 
 func runGit(args ...string) {
 	c := exec.Command("git", args...)
@@ -83,30 +77,69 @@ func person(s object.Signature) string {
 	return s.Email
 }
 
+func firstLine(message string) string {
+	nl := strings.Index(message, "\n")
+	if nl != -1 {
+		return message[:nl]
+	}
+	return message
+}
+
+func sameWeek(a, b time.Time) bool {
+	y1, w1 := a.ISOWeek()
+	y2, w2 := b.ISOWeek()
+	return y1 == y2 && w1 == w2
+}
+
 func humanTime(t time.Time) string {
 	t = t.In(time.Local)
 
 	now := time.Now()
 	sameYear := t.Year() == now.Year()
-	if sameYear && t.Month() == now.Month() && t.Day() == now.Day() {
-		return humanDuration(time.Since(t))
+	since := time.Since(t)
+
+	// Today
+	if sameYear && t.YearDay() == now.YearDay() {
+		return humanDuration(since)
 	}
+
+	// Yesterday
+	if sameYear && t.YearDay() == now.YearDay()-1 {
+		return t.Format("yesterday @ 3:04 PM")
+	}
+
+	if sameWeek(now, t) {
+		return fmt.Sprintf("%s (%s)", t.Format("Monday @ 3:04 PM"), humanDuration(since))
+	}
+
+	// Within a ~week
+	if since < 7*24*time.Hour {
+		return fmt.Sprintf("%s (%s)", t.Format("January 2 @ 3:04 PM"), humanDuration(since))
+	}
+
+	// Within a ~month
+	if since < 30*24*time.Hour {
+		return fmt.Sprintf("%s (%s)", t.Format("January 2 @ 3:04 PM"), humanDuration(since))
+	}
+
 	if sameYear {
-		//	Mon Jan 2 15:04:05 -0700 MST 2006
-		return t.Format("Mon Jan 2, 3:04 PM")
+		return t.Format("January 2")
 	}
-	return t.String()
+
+	return t.Format("January 2, 2006")
+
+	//	Mon Jan 2 15:04:05 -0700 MST 2006
 }
 
 func humanDuration(d time.Duration) string {
 	if d < time.Minute {
-		return "now"
+		return "just now"
 	}
 	if d < time.Hour {
-		return fmt.Sprintf("%d minutes ago", d/time.Minute)
+		return fmt.Sprintf("%s ago", pluralize(d/time.Minute, "minutes"))
 	}
-	if d < 2*24*time.Hour {
-		return fmt.Sprintf("%d hours ago", d/time.Hour)
+	if d < 48*time.Hour {
+		return fmt.Sprintf("%s ago", pluralize(d/time.Hour, "hours"))
 	}
-	return fmt.Sprintf("%d days ago", d/(24*time.Hour))
+	return fmt.Sprintf("%s ago", pluralize(d/(24*time.Hour), "days"))
 }
