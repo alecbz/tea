@@ -1,10 +1,11 @@
 package cmd
 
 import (
+	"fmt"
 	"log"
-	"os/exec"
 	"strings"
 
+	"github.com/go-git/go-git/v5"
 	"github.com/spf13/cobra"
 )
 
@@ -19,12 +20,28 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		branch, err := exec.Command("git", "rev-parse", "--abbrev-ref=strict", "HEAD").Output()
+		r, err := git.PlainOpen(".")
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		showGit("reflog", strings.TrimSpace(string(branch)), "--date=relative")
+		head, err := r.Head()
+		if err != nil {
+			log.Fatal(err)
+		}
+		branch := strings.TrimPrefix(string(head.Name()), "refs/heads/")
+
+		p := page()
+		for _, c := range reflog(r, branch) {
+			if p.Done() {
+				break
+			}
+			fmt.Fprintf(p, "%s %s \n", hash(c.Hash.String()[:7]), message(firstLine(c.Message)))
+			fmt.Fprintf(p, "\t%s - %s\n\n", author(person(c.Author)), humanTime(c.Author.When))
+		}
+		p.Wait()
+
+		// showGit("reflog", strings.TrimSpace(string(branch)), "--date=relative")
 	},
 }
 
