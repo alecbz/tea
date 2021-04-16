@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/go-git/go-git/v5"
 	"github.com/spf13/cobra"
@@ -18,6 +19,16 @@ var localMainCmd = &cobra.Command{
 		r, err := git.PlainOpen(".")
 		if err != nil {
 			log.Fatal(err)
+		}
+
+		h, err := r.Head()
+		if err != nil {
+			log.Fatal(err)
+		}
+		currentBranch := strings.TrimPrefix(string(h.Name()), "refs/heads/")
+
+		if currentBranch == config.MainBranch {
+			runGit("checkout", fmt.Sprintf("origin/%s", config.MainBranch))
 		}
 
 		err = r.DeleteBranch(config.MainBranch)
