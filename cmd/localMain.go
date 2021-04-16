@@ -21,6 +21,14 @@ var localMainCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
+		// Apparently go-git is a steaming pile of dog shit and just omits
+		// branches from cfg.Branches for fun sometimes.
+		cfg, err := r.Config()
+		if err != nil {
+			log.Fatal("fuck you: ", err)
+		}
+		fmt.Println("All the fucking branches:", cfg.Branches)
+
 		h, err := r.Head()
 		if err != nil {
 			log.Fatal(err)
@@ -32,6 +40,7 @@ var localMainCmd = &cobra.Command{
 		}
 
 		err = r.DeleteBranch(config.MainBranch)
+		fmt.Println("Err from delete branch:", err)
 		if err != nil && err != git.ErrBranchNotFound {
 			log.Fatal(err)
 		}
