@@ -39,6 +39,12 @@ var localMainCmd = &cobra.Command{
 			runGit("checkout", fmt.Sprintf("origin/%s", config.MainBranch))
 		}
 
+		// re-open after a manual operation, maybe?
+		r, err = git.PlainOpen(".")
+		if err != nil {
+			log.Fatal(err)
+		}
+
 		err = r.DeleteBranch(config.MainBranch)
 		fmt.Println("Err from delete branch:", err)
 		if err != nil && err != git.ErrBranchNotFound {
